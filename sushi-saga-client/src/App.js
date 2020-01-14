@@ -1,19 +1,56 @@
-import React, { Component } from 'react';
-import SushiContainer from './containers/SushiContainer';
-import Table from './containers/Table';
+  
+import React, { Component } from "react";
+import SushiContainer from "./containers/SushiContainer";
+import Table from "./containers/Table";
 
 // Endpoint!
-const API = "http://localhost:3000/sushis"
+const API = "http://localhost:3000/sushis";
 
 class App extends Component {
+  state = {
+    sushis: [],
+    counter: 0,
+    eaten: [],
+    budget: 1000
+  }
+
+  eatSushi = sushi => {
+    return this.state.eaten.includes(sushi) || this.state.budget < sushi.price
+      ? null
+      : this.setState({
+          eaten: [...this.state.eaten, sushi],
+          budget: this.state.budget - sushi.price
+        })
+  }
+
+  componentDidMount() {
+    fetch(API)
+      .then(resp => resp.json())
+      .then(sushis => this.setState({ sushis: sushis }))
+  }
+
+  grabFour = () => {
+    return this.state.sushis.slice(this.state.counter, this.state.counter + 4);
+  }
+
+  incrementCounter = () => {
+    this.setState({
+      counter: this.state.counter + 4
+    })
+  }
 
   render() {
     return (
       <div className="app">
-        <SushiContainer />
-        <Table />
+        <SushiContainer
+          eaten={this.state.eaten}
+          eatSushi={this.eatSushi}
+          incrementCounter={this.incrementCounter}
+          sushis={this.grabFour()}
+        />
+        <Table budget={this.state.budget} eaten={this.state.eaten} />
       </div>
-    );
+    )
   }
 }
 
